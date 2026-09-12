@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { useStore } from "@/lib/store";
 import { PageHead } from "@/components/ui";
-import EmploiTable from "@/components/EmploiTable";
+import EmploiTable, { THEMES } from "@/components/EmploiTable";
 import { genererEmplois } from "@/lib/engine";
 import { Wand2, Printer, ImageDown, Layers, Palette, Eraser } from "lucide-react";
 
@@ -12,7 +12,7 @@ export default function Emplois() {
   const { state } = store;
   const [mode, setMode] = useState("classe");
   const [cibleId, setCibleId] = useState(state.classes[0]?.id);
-  const [theme, setTheme] = useState("clair");
+  const [theme, setTheme] = useState("royal");
   const [msg, setMsg] = useState("");
   const [edition, setEdition] = useState(false);
   const ref = useRef(null);
@@ -35,7 +35,7 @@ export default function Emplois() {
 
   const exporterPng = async () => {
     if (!ref.current) return;
-    const url = await toPng(ref.current, { pixelRatio: 2, backgroundColor: theme === "sombre" ? "#0f172a" : "#ffffff" });
+    const url = await toPng(ref.current, { pixelRatio: 2, backgroundColor: theme === "nuit" ? "#0b1220" : "#ffffff" });
     const a = document.createElement("a");
     a.download = `جدول-${cible?.nom || "أوقات"}.png`;
     a.href = url;
@@ -48,7 +48,7 @@ export default function Emplois() {
       setCibleId(c.id);
       await new Promise((r) => setTimeout(r, 350));
       if (!ref.current) continue;
-      const url = await toPng(ref.current, { pixelRatio: 2, backgroundColor: theme === "sombre" ? "#0f172a" : "#ffffff" });
+      const url = await toPng(ref.current, { pixelRatio: 2, backgroundColor: theme === "nuit" ? "#0b1220" : "#ffffff" });
       const a = document.createElement("a");
       a.download = `جدول-${c.nom}.png`;
       a.href = url;
@@ -62,9 +62,13 @@ export default function Emplois() {
     if (confirm("حذف محتوى هذه الحصة؟")) store.viderCase(cible.id, key);
   };
 
+  const heuresCible = mode === "classe"
+    ? Object.values(state.emplois[cible?.id] || {}).reduce((s, c) => s + (c?.length || 0), 0)
+    : 0;
+
   return (
     <div className="space-y-5">
-      <PageHead titre="جداول الأوقات" desc="توليد آلي حسب نظام الحصص التونسي — عرض بالقسم أو بالمعلم، وتصدير صور جاهزة للنشر">
+      <PageHead titre="جداول الأوقات" desc="توليد آلي على نظام المدرسة (5 أيام، حصص من ساعتين، فوج صباحي/مسائي) — عرض بالقسم أو بالمعلم وتصدير صور للنشر">
         <button className="btn-ghost" onClick={() => window.print()}><Printer size={16} /> طباعة</button>
         <button className="btn-ghost" onClick={exporterPng}><ImageDown size={16} /> صورة PNG</button>
         <button className="btn-ghost" onClick={exporterTout}><Layers size={16} /> تصدير الكل</button>
@@ -86,9 +90,21 @@ export default function Emplois() {
             ))}
           </select>
         </div>
-        <button className="btn-ghost" onClick={() => setTheme(theme === "clair" ? "sombre" : "clair")}>
-          <Palette size={16} /> {theme === "clair" ? "نسخة داكنة" : "نسخة فاتحة"}
-        </button>
+        <div>
+          <span className="label"><Palette size={12} className="inline ml-1" /> النمط</span>
+          <div className="flex gap-1">
+            {Object.entries(THEMES).map(([k, t]) => (
+              <button
+                key={k}
+                onClick={() => setTheme(k)}
+                className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${theme === k ? "text-white shadow-soft" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                style={theme === k ? { background: t.bandeau } : {}}
+              >
+                {t.nom}
+              </button>
+            ))}
+          </div>
+        </div>
         {mode === "classe" && (
           <button className={edition ? "btn-danger" : "btn-ghost"} onClick={() => setEdition(!edition)}>
             <Eraser size={16} /> {edition ? "إيقاف التعديل اليدوي" : "تعديل يدوي"}
@@ -102,7 +118,7 @@ export default function Emplois() {
 
       <div className="no-print card-p text-xs leading-relaxed text-slate-500">
         نصيحة: «تصدير الكل» ينزّل صور جداول كل الأقسام (أو كل المعلمين) الواحدة تلو الأخرى — جاهزة مباشرة لصفحة الفيسبوك.
-        غيّر أوقات الحصص وأيام العمل من صفحة <b>الإعدادات</b> ثم أعد التوليد.
+        غيّر أوقات الحصص من <b>الإعدادات</b>، وتوقيت كل قسم (صباحي/مسائي) من صفحة <b>الأقسام</b>، ثم أعد التوليد.
       </div>
     </div>
   );

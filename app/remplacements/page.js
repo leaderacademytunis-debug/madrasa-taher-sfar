@@ -19,7 +19,7 @@ export default function Remplacements() {
     res.forEach((r) => {
       const c = state.classes.find((x) => x.id === r.cours.classeId);
       const p = r.propositions[0];
-      l.push(`${r.slot.debut}-${r.slot.fin} | ${c?.nom} | ${state.domaines.find((d) => d.id === r.cours.domaineId)?.nom} → ${p ? p.nom : "لا يوجد متاح"}`);
+      l.push(`${r.bloc.debut}-${r.bloc.fin} | ${c?.nom} | ${state.domaines.find((d) => d.id === r.cours.domaineId)?.nom} → ${p ? p.nom : "لا يوجد متاح"}`);
     });
     return l.join("\n");
   };
@@ -61,7 +61,7 @@ export default function Remplacements() {
             return (
               <div key={i} className="card-p">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="badge bg-slate-100 text-slate-700 font-mono">{r.slot.debut} — {r.slot.fin}</span>
+                  <span className="badge bg-slate-100 text-slate-700 font-mono">{r.bloc.debut} — {r.bloc.fin}</span>
                   <span className="font-display font-bold text-slate-800">{c?.nom}</span>
                   <DomaineBadge id={r.cours.domaineId} small />
                 </div>

@@ -1,13 +1,14 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import { PageHead } from "@/components/ui";
 import { niveauNom } from "@/lib/config";
 import { uid } from "@/lib/engine";
-import { Printer, Upload, Check, X, Clock, Users } from "lucide-react";
+import { Printer, Upload, Check, X, Clock, Users, FileJson } from "lucide-react";
 
 export default function Appel() {
-  const { state, setEleves, setPresence, setPresencesClasse } = useStore();
+  const { state, setEleves, setPresence, setPresencesClasse, importerListes } = useStore();
+  const fileRef = useRef(null);
   const [classeId, setClasseId] = useState(state.classes[0]?.id);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [coller, setColler] = useState(false);
@@ -48,6 +49,21 @@ export default function Appel() {
     <div className="space-y-5">
       <PageHead titre="دفتر المناداة" desc="حضور يومي رقمي لكل قسم + نسخة ورقية للطباعة">
         <button className="btn-ghost" onClick={() => window.print()}><Printer size={16} /> طباعة الدفتر</button>
+        <button className="btn-ghost" onClick={() => fileRef.current?.click()}><FileJson size={16} /> استيراد كل القوائم</button>
+        <input
+          ref={fileRef} type="file" accept="application/json" className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = () => {
+              try { importerListes(JSON.parse(r.result)); alert("تم استيراد القوائم ✅"); }
+              catch { alert("الملف غير صالح"); }
+            };
+            r.readAsText(f);
+            e.target.value = "";
+          }}
+        />
         <button className="btn-primary" onClick={() => setColler(true)}><Upload size={16} /> إدراج قائمة التلاميذ</button>
       </PageHead>
 

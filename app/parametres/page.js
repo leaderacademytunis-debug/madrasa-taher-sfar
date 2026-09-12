@@ -11,7 +11,7 @@ export default function Parametres() {
 
   const setSchool = (k, v) => patch((s) => ({ school: { ...s.school, [k]: v } }));
   const setGrille = (niveau, dom, v) => patch((s) => ({ grille: { ...s.grille, [niveau]: { ...s.grille[niveau], [dom]: Number(v) } } }));
-  const setSeance = (id, k, v) => patch((s) => ({ seances: s.seances.map((x) => (x.id === id ? { ...x, [k]: v } : x)) }));
+  const setBloc = (id, k, v) => patch((s) => ({ blocs: s.blocs.map((x) => (x.id === id ? { ...x, [k]: v } : x)) }));
   const setJour = (id, k, v) => patch((s) => ({ jours: s.jours.map((x) => (x.id === id ? { ...x, [k]: v } : x)) }));
   const setDomaine = (id, k, v) => patch((s) => ({ domaines: s.domaines.map((x) => (x.id === id ? { ...x, [k]: v } : x)) }));
 
@@ -110,25 +110,32 @@ export default function Parametres() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="card-p">
-          <h2 className="mb-4 font-display font-bold text-slate-800">أيام العمل</h2>
+          <h2 className="mb-1 font-display font-bold text-slate-800">أيام العمل</h2>
+          <p className="mb-3 text-xs text-slate-500">نظام المدرسة: خمسة أيام. توقيت كل قسم (صباحي/مسائي) يُضبط من صفحة الأقسام.</p>
           {state.jours.map((j) => (
-            <label key={j.id} className="flex items-center justify-between border-b border-slate-100 py-2 text-sm">
-              <span className="font-semibold text-slate-700">{j.nom}</span>
-              <span className="flex items-center gap-2 text-xs text-slate-500">
-                <input type="checkbox" checked={j.pleine} onChange={(e) => setJour(j.id, "pleine", e.target.checked)} />
-                يوم كامل (صباحا ومساء)
-              </span>
-            </label>
+            <div key={j.id} className="flex items-center justify-between border-b border-slate-100 py-2 text-sm">
+              <input className="font-semibold text-slate-700 bg-transparent outline-none" value={j.nom} onChange={(e) => setJour(j.id, "nom", e.target.value)} />
+              <span className="text-xs text-slate-400">{j.id}</span>
+            </div>
           ))}
         </div>
 
         <div className="card-p">
-          <h2 className="mb-4 font-display font-bold text-slate-800">أوقات الحصص</h2>
-          {state.seances.map((s) => (
-            <div key={s.id} className="flex items-center gap-2 border-b border-slate-100 py-2">
-              <span className="w-28 text-xs text-slate-500">{s.pause ? s.nom : s.periode === "matin" ? "حصة صباحية" : "حصة مسائية"}</span>
-              <input type="time" className="input w-32" value={s.debut} onChange={(e) => setSeance(s.id, "debut", e.target.value)} />
-              <input type="time" className="input w-32" value={s.fin} onChange={(e) => setSeance(s.id, "fin", e.target.value)} />
+          <h2 className="mb-1 font-display font-bold text-slate-800">الحصص</h2>
+          <p className="mb-3 text-xs text-slate-500">الحصة من ساعتين تقبل مادتين؛ حصة 12-13 مادة واحدة.</p>
+          {state.blocs.map((b) => (
+            <div key={b.id} className="flex flex-wrap items-center gap-2 border-b border-slate-100 py-2">
+              <input className="input w-16 text-center" value={b.debut} onChange={(e) => setBloc(b.id, "debut", e.target.value)} />
+              <span className="text-slate-400">—</span>
+              <input className="input w-16 text-center" value={b.fin} onChange={(e) => setBloc(b.id, "fin", e.target.value)} />
+              <select className="input w-32" value={b.periode} onChange={(e) => setBloc(b.id, "periode", e.target.value)}>
+                <option value="matin">صباحية</option>
+                <option value="apresmidi">مسائية</option>
+              </select>
+              <select className="input w-28" value={b.capacite} onChange={(e) => setBloc(b.id, "capacite", Number(e.target.value))}>
+                <option value={1}>مادة واحدة</option>
+                <option value={2}>مادتان</option>
+              </select>
             </div>
           ))}
         </div>
